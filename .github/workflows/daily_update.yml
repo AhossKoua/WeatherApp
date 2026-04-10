@@ -1,0 +1,30 @@
+name: Daily Weather Update
+on:
+  schedule:
+    - cron: '0 4 * * *' # Runs every day at 04:00 UTC
+  workflow_dispatch: # Allows you to run it manually for testing
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install dependencies
+        run: |
+          Rscript -e 'install.packages(c("rdwd", "dplyr", "lubridate", "purrr", "tidyr", "geosphere", "readr"))'
+
+      - name: Run Update Script
+        run: Rscript update_weather.R
+
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "actions@github.com"
+          git add Bro_web_app/weather_data_full.rds
+          git commit -m "Daily weather update: $(date +'%Y-%m-%d')" || exit 0
+          git push
