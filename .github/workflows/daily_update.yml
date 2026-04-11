@@ -16,7 +16,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          Rscript -e 'install.packages(c("rdwd", "dplyr", "lubridate", "purrr", "tidyr", "geosphere", "readr"))'
+          Rscript -e 'install.packages(c("tidyverse", "rdwd", "geosphere", "rsconnect", "shiny", "bslib", "plotly"))'
 
       - name: Run Update Script
         run: Rscript update_weather.R
