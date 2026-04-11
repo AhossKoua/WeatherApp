@@ -11,15 +11,33 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
+
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
+          sudo apt-get install -y \
+            libcurl4-openssl-dev \
+            libssl-dev \
+            libxml2-dev \
+            libfontconfig1-dev \
+            libharfbuzz-dev \
+            libfribidi-dev \
+            libfreetype6-dev \
+            libpng-dev \
+            libtiff5-dev \
+            libjpeg-dev
 
       - name: Install R Packages
         run: |
-          Rscript -e 'install.packages(c("tidyverse", "rdwd", "geosphere", "shiny", "bslib", "plotly", "rsconnect", "leaflet", "bsicons", "lubridate"), lib="/usr/local/lib/R/site-library")'
-
+          Rscript -e '
+            install.packages("curl", type="source")
+            install.packages("httr2", type="source")
+            install.packages(c(
+              "tidyverse", "rdwd", "geosphere", "shiny",
+              "bslib", "plotly", "rsconnect", "leaflet",
+              "bsicons", "lubridate"
+            ))
+          '
       - name: Run Update Script
         run: Rscript update_weather.R
 
