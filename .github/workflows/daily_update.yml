@@ -37,7 +37,9 @@ jobs:
               "bslib", "plotly", "rsconnect", "leaflet",
               "bsicons", "lubridate"
             ))
+            cat("rsconnect installed at:", find.package("rsconnect"), "\n")
           '
+          
       - name: Run Update Script
         run: Rscript update_weather.R
 
@@ -57,7 +59,6 @@ jobs:
           SHINY_SECRET: ${{ secrets.SHINY_SECRET }}
         run: |
           Rscript -e "
-            library('rsconnect', lib.loc='/usr/local/lib/R/site-library')
             rsconnect::setAccountInfo(
               name=Sys.getenv('SHINY_ACC_NAME'),
               token=Sys.getenv('SHINY_TOKEN'),
