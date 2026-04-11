@@ -36,4 +36,4 @@ jobs:
       - name: Deploy to shinyapps.io
         run: |
           Rscript -e "rsconnect::setAccountInfo(name='${{ secrets.SHINY_ACC_NAME }}', token='${{ secrets.SHINY_TOKEN }}', secret='${{ secrets.SHINY_SECRET }}')"
-          Rscript -e "rsconnect::deployApp(appDir='Bro_web_app', appName='WeatherApp', forceUpdate=TRUE)"
+          Rscript -e "rsconnect::deployApp(appDir='Bro_web_app', appName='orchard_weather_tool', forceUpdate=TRUE)"
