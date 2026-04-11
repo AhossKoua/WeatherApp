@@ -37,7 +37,8 @@ jobs:
             pak::pak(c(
               "tidyverse", "rdwd", "geosphere", "shiny",
               "bslib", "plotly", "rsconnect", "leaflet",
-              "bsicons", "lubridate"
+              "bsicons", "lubridate",
+              "cpp11", "progress"
             ))
             cat("rsconnect path:", find.package("rsconnect"), "\n")
           '
@@ -66,5 +67,10 @@ jobs:
               token=Sys.getenv('SHINY_TOKEN'),
               secret=Sys.getenv('SHINY_SECRET')
             )
-            rsconnect::deployApp(appDir='Bro_web_app', appName='orchard_weather_tool', forceUpdate=TRUE)
+            rsconnect::deployApp(
+              appDir='Bro_web_app',
+              appName='orchard_weather_tool',
+              forceUpdate=TRUE,
+              lint=FALSE
+            )
           "
