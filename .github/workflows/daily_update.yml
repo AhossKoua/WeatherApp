@@ -1,16 +1,14 @@
 name: Daily Weather Update
 on:
   schedule:
-    - cron: '0 4 * * *' # Runs every day at 04:00 UTC
-  workflow_dispatch: # Allows manual testing
+    - cron: '0 4 * * *'
+  workflow_dispatch:
 jobs:
   update-data:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Setup R
-        uses: r-lib/actions/setup-r@v2
 
       - name: Install System Dependencies
         run: |
@@ -27,19 +25,23 @@ jobs:
             libtiff5-dev \
             libjpeg-dev
 
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
       - name: Install R Packages
         run: |
           Rscript -e '
-            install.packages("curl", type="source")
-            install.packages("httr2", type="source")
-            install.packages(c(
+            install.packages("pak", repos="https://r-lib.github.io/p/pak/stable/")
+            pak::pak(c(
               "tidyverse", "rdwd", "geosphere", "shiny",
               "bslib", "plotly", "rsconnect", "leaflet",
               "bsicons", "lubridate"
             ))
-            cat("rsconnect installed at:", find.package("rsconnect"), "\n")
+            cat("rsconnect path:", find.package("rsconnect"), "\n")
           '
-          
+
       - name: Run Update Script
         run: Rscript update_weather.R
 
