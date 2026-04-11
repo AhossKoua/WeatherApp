@@ -18,10 +18,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libcurl4-openssl-dev libssl-dev libxml2-dev
-
+          
       - name: Install R Packages
-        run: |
-          Rscript -e 'install.packages(c("tidyverse", "rdwd", "geosphere", "shiny", "bslib", "plotly", "rsconnect", "leaflet", "bsicons", "lubridate"))'
+       run: |
+         Rscript -e 'install.packages(c("tidyverse", "rdwd", "geosphere", "shiny", "bslib", "plotly", "rsconnect", "leaflet", "bsicons", "lubridate"), lib="/usr/local/lib/R/site-library")'
      
       - name: Run Update Script
         run: Rscript update_weather.R
@@ -36,6 +36,17 @@ jobs:
           git push  
           
       - name: Deploy to shinyapps.io
+        env:
+          SHINY_ACC_NAME: ${{ secrets.SHINY_ACC_NAME }}
+          SHINY_TOKEN: ${{ secrets.SHINY_TOKEN }}
+          SHINY_SECRET: ${{ secrets.SHINY_SECRET }}
         run: |
-          Rscript -e "rsconnect::setAccountInfo(name='${{ secrets.SHINY_ACC_NAME }}', token='${{ secrets.SHINY_TOKEN }}', secret='${{ secrets.SHINY_SECRET }}')"
-          Rscript -e "rsconnect::deployApp(appDir='Bro_web_app', appName='orchard_weather_tool', forceUpdate=TRUE)"
+          Rscript -e "
+            library('rsconnect', lib.loc='/usr/local/lib/R/site-library')
+            rsconnect::setAccountInfo(
+              name=Sys.getenv('SHINY_ACC_NAME'),
+              token=Sys.getenv('SHINY_TOKEN'),
+              secret=Sys.getenv('SHINY_SECRET')
+            )
+            rsconnect::deployApp(appDir='Bro_web_app', appName='orchard_weather_tool', forceUpdate=TRUE)
+          "
