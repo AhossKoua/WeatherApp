@@ -50,7 +50,9 @@ jobs:
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "actions@github.com"
+          git stash
           git pull --rebase origin main
+          git stash pop
           git add Bro_web_app/weather_data_full.rds
           git commit -m "Daily weather update: $(date +'%Y-%m-%d')" || exit 0
           git push
