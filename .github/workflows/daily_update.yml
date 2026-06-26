@@ -72,6 +72,9 @@ jobs:
               token=Sys.getenv('SHINY_TOKEN'),
               secret=Sys.getenv('SHINY_SECRET')
             )
+            options(repos = c(
+              CRAN = 'https://packagemanager.posit.co/cran/2024-01-01'
+            ))
             rsconnect::deployApp(
               appDir='Bro_web_app',
               appName='orchard_weather_tool',
