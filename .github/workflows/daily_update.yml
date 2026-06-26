@@ -37,6 +37,9 @@ jobs:
             install.packages("pak", repos="https://r-lib.github.io/p/pak/stable/")
             install.packages("remotes")
             remotes::install_version("terra", version="1.7-78")
+            install.packages(c("KernSmooth", "MASS", "lattice"), 
+                           type="binary",
+                           repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")
             pak::pak(c(
               "tidyverse", "rdwd", "geosphere", "shiny",
               "bslib", "plotly", "rsconnect", "leaflet",
@@ -66,14 +69,14 @@ jobs:
           SHINY_SECRET: ${{ secrets.SHINY_SECRET }}
         run: |
           Rscript -e "
+            options(repos = c(
+              CRAN = 'https://packagemanager.posit.co/cran/__linux__/jammy/latest'
+            ))
             rsconnect::setAccountInfo(
               name=Sys.getenv('SHINY_ACC_NAME'),
               token=Sys.getenv('SHINY_TOKEN'),
               secret=Sys.getenv('SHINY_SECRET')
             )
-            options(repos = c(
-              CRAN = 'https://packagemanager.posit.co/cran/2024-01-01'
-            ))
             rsconnect::deployApp(
               appDir='Bro_web_app',
               appName='orchard_weather_tool',
