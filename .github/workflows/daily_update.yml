@@ -35,6 +35,8 @@ jobs:
         run: |
           Rscript -e '
             install.packages("pak", repos="https://r-lib.github.io/p/pak/stable/")
+            install.packages("remotes")
+            remotes::install_version("terra", version="1.7-78")
             pak::pak(c(
               "tidyverse", "rdwd", "geosphere", "shiny",
               "bslib", "plotly", "rsconnect", "leaflet",
