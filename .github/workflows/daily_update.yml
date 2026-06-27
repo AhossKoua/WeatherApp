@@ -37,16 +37,20 @@ jobs:
       - name: Install R Packages
         run: |
           Rscript -e '
-            repo <- "https://packagemanager.posit.co/cran/__linux__/jammy/latest"
-            install.packages("remotes", repos=repo)
-            remotes::install_version("terra", version="1.7-29",
-              repos=repo, upgrade="never")
+            jammy <- "https://packagemanager.posit.co/cran/__linux__/jammy/latest"
+            runiverse <- "https://rspatial.r-universe.dev"
+
+            # Install terra as pre-compiled binary from r-universe
+            install.packages("terra", repos=c(runiverse, jammy), type="binary")
+
+            # Install everything else from Posit binary mirror
             install.packages(c(
-              "KernSmooth", "MASS", "lattice",
+              "remotes", "KernSmooth", "MASS", "lattice",
               "tidyverse", "rdwd", "geosphere", "shiny",
               "bslib", "plotly", "rsconnect", "leaflet",
               "bsicons", "lubridate", "cpp11", "progress"
-            ), repos=repo)
+            ), repos=jammy)
+
             cat("terra version:", as.character(packageVersion("terra")), "\n")
             cat("rsconnect path:", find.package("rsconnect"), "\n")
           '
