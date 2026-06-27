@@ -34,27 +34,23 @@ jobs:
       - name: Install R Packages
         run: |
           Rscript -e '
-            install.packages("remotes",
-              repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")
-            install.packages("pak", repos="https://r-lib.github.io/p/pak/stable/")
-
+            repo <- "https://packagemanager.posit.co/cran/__linux__/jammy/latest"
+            
+            install.packages("remotes", repos=repo)
+            
             remotes::install_version("terra", version="1.7-78",
-              repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest",
-              upgrade="never")
+              repos=repo, upgrade="never")
 
-            install.packages(c("KernSmooth", "MASS", "lattice"),
-              repos="https://packagemanager.posit.co/cran/__linux__/jammy/latest")
-
-            pak::pak(c(
+            install.packages(c(
+              "KernSmooth", "MASS", "lattice",
               "tidyverse", "rdwd", "geosphere", "shiny",
               "bslib", "plotly", "rsconnect", "leaflet",
               "bsicons", "lubridate", "cpp11", "progress"
-            ), upgrade=FALSE)
+            ), repos=repo)
 
             cat("terra version:", as.character(packageVersion("terra")), "\n")
             cat("rsconnect path:", find.package("rsconnect"), "\n")
           '
-
       - name: Run Update Script
         run: Rscript update_weather.R
 
