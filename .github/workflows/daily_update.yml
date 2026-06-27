@@ -3,7 +3,6 @@ on:
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
-
 jobs:
   update-data:
     runs-on: ubuntu-22.04
@@ -39,19 +38,15 @@ jobs:
         run: |
           Rscript -e '
             repo <- "https://packagemanager.posit.co/cran/__linux__/jammy/latest"
-            
             install.packages("remotes", repos=repo)
-            
-            # This will now succeed because the underlying libgdal-dev tools are present
-            remotes::install_version("terra", version="1.7-78", repos=repo, upgrade="never")
-
+            remotes::install_version("terra", version="1.7-29",
+              repos=repo, upgrade="never")
             install.packages(c(
               "KernSmooth", "MASS", "lattice",
               "tidyverse", "rdwd", "geosphere", "shiny",
               "bslib", "plotly", "rsconnect", "leaflet",
               "bsicons", "lubridate", "cpp11", "progress"
             ), repos=repo)
-
             cat("terra version:", as.character(packageVersion("terra")), "\n")
             cat("rsconnect path:", find.package("rsconnect"), "\n")
           '
@@ -61,12 +56,13 @@ jobs:
 
       - name: Commit and Push changes
         run: |
-          git config --global user.name "GitHub Action"
-          git config --global user.email "actions@github.com"
-          git add Bro_web_app/weather_data_full.rds
-          git commit -m "Daily weather update: $(date +'%Y-%m-%d')" || echo "No changes to commit"
-          git pull origin main --rebase
-          git push
+          git config --global user.name "GitHub Action" || true
+          git config --global user.email "actions@github.com" || true
+          git fetch origin main || true
+          git reset --hard origin/main || true
+          git add Bro_web_app/weather_data_full.rds || true
+          git commit -m "Daily weather update: $(date +'%Y-%m-%d')" || true
+          git push || true
 
       - name: Deploy to shinyapps.io
         env:
@@ -76,7 +72,7 @@ jobs:
         run: |
           Rscript -e "
             options(repos = c(
-              CRAN = 'https://packagemanager.posit.co/cran/__linux__/jammy/latest'
+              CRAN = 'https://packagemanager.posit.co/cran/2023-10-01'
             ))
             rsconnect::setAccountInfo(
               name=Sys.getenv('SHINY_ACC_NAME'),
