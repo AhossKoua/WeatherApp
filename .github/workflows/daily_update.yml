@@ -3,6 +3,7 @@ on:
   schedule:
     - cron: '0 4 * * *'
   workflow_dispatch:
+
 jobs:
   update-data:
     runs-on: ubuntu-22.04
@@ -23,7 +24,10 @@ jobs:
             libfreetype6-dev \
             libpng-dev \
             libtiff5-dev \
-            libjpeg-dev
+            libjpeg-dev \
+            libgdal-dev \
+            libproj-dev \
+            libgeos-dev
 
       - name: Setup R
         uses: r-lib/actions/setup-r@v2
@@ -38,8 +42,8 @@ jobs:
             
             install.packages("remotes", repos=repo)
             
-            remotes::install_version("terra", version="1.7-78",
-              repos=repo, upgrade="never")
+            # This will now succeed because the underlying libgdal-dev tools are present
+            remotes::install_version("terra", version="1.7-78", repos=repo, upgrade="never")
 
             install.packages(c(
               "KernSmooth", "MASS", "lattice",
@@ -51,18 +55,18 @@ jobs:
             cat("terra version:", as.character(packageVersion("terra")), "\n")
             cat("rsconnect path:", find.package("rsconnect"), "\n")
           '
+
       - name: Run Update Script
         run: Rscript update_weather.R
 
       - name: Commit and Push changes
         run: |
-          git config --global user.name "GitHub Action" || true
-          git config --global user.email "actions@github.com" || true
-          git fetch origin main || true
-          git reset --hard origin/main || true
-          git add Bro_web_app/weather_data_full.rds || true
-          git commit -m "Daily weather update: $(date +'%Y-%m-%d')" || true
-          git push || true
+          git config --global user.name "GitHub Action"
+          git config --global user.email "actions@github.com"
+          git add Bro_web_app/weather_data_full.rds
+          git commit -m "Daily weather update: $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git pull origin main --rebase
+          git push
 
       - name: Deploy to shinyapps.io
         env:
