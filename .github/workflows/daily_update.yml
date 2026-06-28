@@ -42,7 +42,8 @@ jobs:
               "remotes", "KernSmooth", "MASS", "lattice",
               "tidyverse", "rdwd", "geosphere", "shiny",
               "bslib", "plotly", "rsconnect",
-              "bsicons", "lubridate", "cpp11", "progress"
+              "bsicons", "lubridate", "cpp11", "progress",
+              "otel"
             ), repos=jammy)
             cat("rsconnect path:", find.package("rsconnect"), "\n")
           '
@@ -68,7 +69,7 @@ jobs:
         run: |
           Rscript -e "
             options(repos = c(
-              CRAN = 'https://packagemanager.posit.co/cran/2023-10-01'
+              CRAN = 'https://packagemanager.posit.co/cran/__linux__/jammy/latest'
             ))
             rsconnect::setAccountInfo(
               name=Sys.getenv('SHINY_ACC_NAME'),
@@ -78,6 +79,7 @@ jobs:
             rsconnect::deployApp(
               appDir='Bro_web_app',
               appName='orchard_weather_tool',
+              appFiles=c('app.R', 'weather_data_full.rds'),
               forceUpdate=TRUE,
               lint=FALSE
             )
