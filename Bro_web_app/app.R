@@ -5,7 +5,6 @@ library(shiny)
 library(bslib)
 library(tidyverse)
 library(plotly)
-library(leaflet)
 library(bsicons)
 library(lubridate)
 
@@ -69,7 +68,7 @@ ui <- page_navbar(
       
       # NEW: Heat Days Box
       value_box(
-        title = "Heat Days (≥30°C)",
+        title = "Heat Days (>=30°C)",
         value = textOutput("heat_days"),
         showcase = bsicons::bs_icon("sun-fill"),
         theme = "warning"
@@ -102,7 +101,7 @@ ui <- page_navbar(
     # ROW 3: Location Context (Full Width at Bottom)
     card(
       card_header("Location Context"),
-      leafletOutput("map", height = "350px")
+      tableOutput("map")
     )
   )
 )
@@ -170,7 +169,6 @@ server <- function(input, output, session) {
   
   # --- PLOTS ---
   
-  
   output$climate_combined_plot <- renderPlotly({
     df <- filtered_data()
     monthly_df <- df %>%
@@ -181,7 +179,6 @@ server <- function(input, output, session) {
     coeff <- max(monthly_df$precip, na.rm = TRUE) / max(monthly_df$temp_avg, na.rm = TRUE)
     
     # THE GATEKEEPER: Stop here if there is no data
-    # This prevents the "Argument 1 ist kein Vektor" error
     validate(
       need(nrow(df) > 0, "No data found for this orchard and date range. Please check your filters.")
     )
@@ -197,12 +194,10 @@ server <- function(input, output, session) {
     ggplotly(p) 
   })
   
-  
   output$temp_plot <- renderPlotly({
-    df <- filtered_data() # After you call the data to be visualized, then you call the Gate keeper before ploting.
+    df <- filtered_data()
     
     # THE GATEKEEPER: Stop here if there is no data
-    # This prevents the "Argument 1 ist kein Vektor" error
     validate(
       need(nrow(df) > 0, "No data found for this orchard and date range. Please check your filters.")
     )
@@ -215,14 +210,16 @@ server <- function(input, output, session) {
     if(input$show_frost_line) p <- p + geom_hline(yintercept = 0, linetype = "dashed")
     ggplotly(p)
   })
-  
-  output$map <- renderLeaflet({
+
+  # --- LOCATION TABLE (replaces leaflet map) ---
+  output$map <- renderTable({
     req(nrow(filtered_data()) > 0)
     row <- filtered_data()[1, ]
-    leaflet() %>%
-      addTiles() %>%
-      addMarkers(lng = row$lon_orchard, lat = row$lat_orchard, popup = "Orchard") %>%
-      addCircleMarkers(lng = row$lon_station, lat = row$lat_station, color = "red")
+    data.frame(
+      Location = c("Orchard", "Weather Station"),
+      Latitude  = c(row$lat_orchard, row$lat_station),
+      Longitude = c(row$lon_orchard, row$lon_station)
+    )
   })
   
   # --- Inside the Server Function ---
@@ -235,7 +232,6 @@ server <- function(input, output, session) {
     max_val <- max(df$TX, na.rm = TRUE)
     min_val <- min(df$TN, na.rm = TRUE)
     
-    # Using small font to ensure it fits the box nicely
     HTML(paste0(
       "<span style='font-size: 0.8em;'>↑ <b>", max_val, "°C</b></span><br/>",
       "<span style='font-size: 0.8em;'>↓ <b>", min_val, "°C</b></span>"
@@ -245,7 +241,6 @@ server <- function(input, output, session) {
   # Ensure GDD uses your specific base 5.6°C
   output$gdd_sum <- renderText({ 
     df_bio <- filtered_data() %>% filter(date >= input$biofix_date)
-    # Assuming your data has a column or you calculate it here:
     gdd_vals <- pmax(df_bio$TM - 5.6, 0)
     paste(round(sum(gdd_vals, na.rm = TRUE), 0), "Units")
   })
