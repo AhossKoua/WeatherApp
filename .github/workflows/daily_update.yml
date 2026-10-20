@@ -55,17 +55,12 @@ jobs:
         run: |
           git config --global user.name "GitHub Action" || true
           git config --global user.email "actions@github.com" || true
-          git fetch origin main || true
-          git reset --hard origin/main || true
+          git pull --rebase origin main || true
           git add Bro_web_app/weather_data_full.rds || true
           git commit -m "Daily weather update: $(date +'%Y-%m-%d')" || true
           git push || true
 
       - name: Deploy to shinyapps.io
-        env:
-          SHINY_ACC_NAME: ${{ secrets.SHINY_ACC_NAME }}
-          SHINY_TOKEN: ${{ secrets.SHINY_TOKEN }}
-          SHINY_SECRET: ${{ secrets.SHINY_SECRET }}
         run: |
           Rscript -e "
             options(repos = c(
@@ -84,3 +79,40 @@ jobs:
               lint=FALSE
             )
           "
+        env:
+          SHINY_ACC_NAME: ${{ secrets.SHINY_ACC_NAME }}
+          SHINY_TOKEN: ${{ secrets.SHINY_TOKEN }}
+          SHINY_SECRET: ${{ secrets.SHINY_SECRET }}
+
+      - name: Send success email
+        if: success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "✅ Weather App updated successfully - $(date +'%Y-%m-%d')"
+          to: ${{ secrets.EMAIL_USERNAME }}
+          from: GitHub Actions
+          body: |
+            Your BRO Orchards weather app ran successfully today.
+            - DWD data updated ✅
+            - App deployed to shinyapps.io ✅
+            View your app: https://your_username.shinyapps.io/orchard_weather_tool/
+
+      - name: Send failure email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "❌ Weather App FAILED - $(date +'%Y-%m-%d')"
+          to: ${{ secrets.EMAIL_USERNAME }}
+          from: GitHub Actions
+          body: |
+            Your BRO Orchards weather app failed today.
+            Check the logs here:
+            https://github.com/AhossKoua/WeatherApp/actions
