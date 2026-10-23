@@ -88,13 +88,13 @@ jobs:
         if: success()
         uses: dawidd6/action-send-mail@v4
         with:
-          server_address: smtp-mail.outlook.com
-          server_port: 587
-          secure: false
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "Weather App updated successfully"
-          to: ${{ secrets.EMAIL_USERNAME }}
+          to: koua_patrick@live.fr
           from: ${{ secrets.EMAIL_USERNAME }}
           body: |
             Your BRO Orchards weather app ran successfully today.
